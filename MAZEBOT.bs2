@@ -1,0 +1,52 @@
+' {$STAMP BS2}
+
+'
+' Port constants
+'
+CONST LEFT_MTR = 12
+CONST RIGHT_MTR = 13
+
+'
+' Turns the robot right for an amount of time
+'
+SUB TURN_RIGHT (TIME)
+  FOR 1 TO TIME
+    PULSOUT LEFT_MTR, 500
+    PULSOUT RIGHT_MTR, -500
+    PAUSE 20
+  NEXT
+END SUB
+
+'
+' Turns the robot left for an amount of time
+'
+SUB TURN_LEFT (TIME)
+  FOR 1 TO TIME
+    PULSOUT LEFT_MTR, -500
+    PULSOUT RIGHT_MTR, 500
+    PAUSE 20
+  NEXT
+END SUB
+
+'
+' Moves the robot forward for an amount of time
+'
+SUB MOVE_FWD (TIME)
+  FOR 1 TO TIME
+    PULSOUT LEFT_MTR, 500
+    PULSOUT RIGHT_MTR, 500
+    PAUSE 20
+  NEXT
+END SUB
+
+'
+' Moves the robot backward for an amount of time
+'
+SUB MOVE_BACK (TIME)
+  FOR 1 TO TIME
+    PULSOUT LEFT_MTR, -500
+    PULSOUT RIGHT_MTR, -500
+    PAUSE 20
+  NEXT
+END SUB
+

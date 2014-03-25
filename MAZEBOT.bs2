@@ -1,18 +1,24 @@
 ' {$STAMP BS2}
 
 '
-' Port constants
+' Define motor constants
 '
-CONST LEFT_MTR = 12
-CONST RIGHT_MTR = 13
+CONST LEFT_MOTOR = 12
+CONST RIGHT_13
+
+'
+' Reset motors
+'
+LOW LEFT_MOTOR
+LOW RIGHT_MOTOR
 
 '
 ' Turns the robot right for an amount of time
 '
 SUB TURN_RIGHT (TIME)
   FOR 1 TO TIME
-    PULSOUT LEFT_MTR, 500
-    PULSOUT RIGHT_MTR, -500
+    PULSOUT LEFT_MOTOR, 500
+    PULSOUT RIGHT_MOTOR, -500
     PAUSE 20
   NEXT
 END SUB
@@ -22,8 +28,8 @@ END SUB
 '
 SUB TURN_LEFT (TIME)
   FOR 1 TO TIME
-    PULSOUT LEFT_MTR, -500
-    PULSOUT RIGHT_MTR, 500
+    PULSOUT LEFT_MOTOR, -500
+    PULSOUT RIGHT_MOTOR, 500
     PAUSE 20
   NEXT
 END SUB
@@ -31,21 +37,21 @@ END SUB
 '
 ' Moves the robot forward for an amount of time
 '
-SUB MOVE_FWD (TIME)
+SUB MOVE_FORWARD (TIME)
   FOR 1 TO TIME
-    PULSOUT LEFT_MTR, 500
-    PULSOUT RIGHT_MTR, 500
+    PULSOUT LEFT_MOTOR, 500
+    PULSOUT RIGHT_MOTOR, 500
     PAUSE 20
   NEXT
 END SUB
 
 '
-' Moves the robot backward for an amount of time
+' Moves the robot BACKWARDward for an amount of time
 '
-SUB MOVE_BACK (TIME)
+SUB MOVE_BACKWARD (TIME)
   FOR 1 TO TIME
-    PULSOUT LEFT_MTR, -500
-    PULSOUT RIGHT_MTR, -500
+    PULSOUT LEFT_MOTOR, -500
+    PULSOUT RIGHT_MOTOR, -500
     PAUSE 20
   NEXT
 END SUB

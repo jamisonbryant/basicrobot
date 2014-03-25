@@ -16,6 +16,19 @@ right_MOTOR = 13
 LOW left_MOTOR
 LOW right_MOTOR
 
+'
+' Navigates the robot through the maze
+'
+' NOTE: Unfortunately, due to the way PBASIC runs its code procedurally the
+' program will continually go back to the beginning of the MAIN subroutine 
+' after any of the movement subroutines (FORQARD, RIGHT, etc.) return.
+'
+' The only way to get PBASIC to call the subroutines once each is to have a 
+' loop iterate over a set of instructions and call the movement subroutine
+' once and only once, without it having to return to the main subroutine.
+'
+' For more information, see the EEPROM sample code on Abanulo's website.
+'
 MAIN:
   FORWARD
   RIGHT

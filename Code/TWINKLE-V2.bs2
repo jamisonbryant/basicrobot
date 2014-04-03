@@ -1,6 +1,4 @@
 ' {$STAMP BS2}
-DEBUG CLS,"i am a robot"
-DEBUG CLS, "Beep!!!"
 OUTPUT 2
 
 twinkle_twinkle:

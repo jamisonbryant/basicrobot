@@ -1,0 +1,45 @@
+' Robotics! v1.5, Program Listing 3.3: Light Follower
+' {$Stamp bs2} ' Stamp Directive.
+'----- Declarations --------------
+left_photo VAR Word ' For storing measured RC times of
+right_photo VAR Word ' the left & right photoresistors.
+'----- Initialization ------------
+OUTPUT 2 ' Set P2 to output.
+FREQOUT 2, 2000, 3000 ' Program start/restart signal.
+LOW 12 ' Set P12 and 13 to output-low.
+LOW 13
+'----- Main Routine --------------
+main:
+' Measure RC time for right photoresistor.
+HIGH 3 ' Set P3 to output-high.
+PAUSE 3 ' Pause for 3 ms.
+RCTIME 3,1,right_photo ' Measure RC time on P3.
+' Measure RC time for left photoresistor.
+HIGH 5 ' Set P5 to output-high.
+PAUSE 3 ' Pause for 3 ms.
+RCTIME 5,1,left_photo ' Measure RC time on P5.
+' Check if difference between RC times is within the deadband, 2 in this
+'case'
+' If yes, then forward. If no then skip to check_dir subroutine.
+IF ABS(10+left_photo-right_photo) > 10 THEN check_dir
+forward_pulse:
+PULSOUT 12, 500
+PULSOUT 13, 1000
+PAUSE 20
+GOTO main
+' Jump to either right_turn or left_turn depending on which RC time is
+'larger'
+check_dir:
+IF 10+left_photo > right_photo THEN right_pulse
+IF left_photo < right_photo THEN left_pulse
+'----- Navigation Routines -------
+left_pulse: ' Apply one pulse to left then
+PULSOUT 12, 500
+PULSOUT 13, 500
+PAUSE 20
+GOTO main ' go back to main routine.
+right_pulse: ' Apply one pulse to right then
+PULSOUT 12, 1000
+PULSOUT 13, 1000
+PAUSE 20
+GOTO main ' go back to main routine.

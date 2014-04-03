@@ -1,0 +1,55 @@
+' {$STAMP BS2}
+
+'----- Declarations --------------
+lphoto VAR Word ' For storing measured RC times of
+rphoto VAR Word ' the left & right photoresistors.
+
+'----- Initialization ------------
+OUTPUT 2
+FREQOUT 2, 2000, 3000
+LOW 12
+LOW 13
+
+'----- Main routine --------------
+
+main:
+	' Get value of right photoresistor
+	HIGH 3
+	PAUSE 3
+	RCTIME 3, 1, rphoto
+	
+	' Get value of left photoresistor
+	HIGH 5
+	PAUSE 3
+	RCTIME 5, 1, lphoto
+
+	' Check if difference between values is within range
+	IF ABS(10 + lphoto - rphoto) > 10 THEN decide
+
+'----- Subroutines ---------------
+	
+' Decide whether to turn left or right
+decide:
+	IF 10 + lphoto > rphoto THEN right
+	IF lphoto < rphoto THEN left
+
+' Go forward
+forward:
+	PULSOUT 12, 500
+	PULSOUT 13, 1000
+	PAUSE 20
+	GOTO main
+
+' Turn left
+left:
+	PULSOUT 12, 500
+	PULSOUT 13, 500
+	PAUSE 20
+	GOTO main
+
+' Turn right
+right:
+	PULSOUT 12, 1000
+	PULSOUT 13, 1000
+	PAUSE 20
+	GOTO main

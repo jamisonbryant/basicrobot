@@ -1,10 +1,12 @@
 ' {$STAMP BS2}
 
 '----------- Declarations -----------'
-L_PHOTO VAR Word
-R_PHOTO VAR Word
-F_PHOTO VAR Word
-F_DIST det VAR Bit
+left_color_sensor VAR Word
+right_color_sensor VAR Word
+front_color_sensor VAR Word
+front_distance_sensor VAR Bit
+front_distance_value VAR Bit
+
 turn_back VAR Word
 pick_up VAR Word
 move_to VAR Word
@@ -31,113 +33,140 @@ OUTPUT 9
 OUTPUT 10
 OUTPUT 11
 OUTPUT 12
-FREQOUT 1, 2000 3000
+FREQOUT 1, 2000, 3000
 turn = 0
 
 '--------- Subroutines ----------'
 main:
-HIGH 3 ' Set P3 to output-high.
-PAUSE 3 ' Pause f.or 3 ms.
-RCTIME 3,1,R_PHOTO ' Measure RC time on P3.
-' Measure RC time for left photoresistor.
-HIGH 5 ' Set P5 to output-high.
-PAUSE 3 ' Pause for 3 ms.
-RCTIME 5,1,L_PHOTO ' Measure RC time on P5.
-' Check if difference between RC times is within the deadband, 2 in this
-'case'
-' If yes, then forward. If no then skip to check_dir subroutine.
-RCTIME 1,1,F_PHOTO 'measure RC time on front photo resistor
-FREQOUT 7, 1, 38500 ' Send freqout signal - left IRLED.
-F_DIST_det = IN8 ' Store IR detector output in RAM.
-' Detect object on the right.
-IF IN8 =0 THEN pick_up_ball 'if object is in front pause the bot'
-IF ABS(13+L_PHOTO-R_PHOTO) > 10 THEN check_dir    'if their is something
-'in front than GOTO pick up routine'
-forward_pulse:   'move forward
-PULSOUT 12, 500
-PULSOUT 13, 1000
-PAUSE 20
-GOTO main
-check_dir:
-IF 13+L_PHOTO > R_PHOTO THEN right_pulse
-IF L_PHOTO < R_PHOTO THEN left_pulse
-'----- Navigation Routines -------
-left_pulse: ' Apply one pulse to left then
-PULSOUT 12, 500
-PULSOUT 13, 500
-PAUSE 20
-GOTO main ' go back to main routine.
-right_pulse: ' Apply one pulse to right then
-PULSOUT 12, 1000
-PULSOUT 13, 1000
-PAUSE 20
-GOTO main ' go back to main routine.
-'--------pick up object-------
-pick_up_ball:
-turn+1
-IF turn= 1 GOTO pickup
-IF turn= 2 GOTO dropoff
+  ' Get R color value
+  HIGH 3
+  PAUSE 3
+  RCTIME 3, 1, right_color_sensor
 
-pickup:
-FOR Turn_to = 1 TO 12
-PULSOUT 12,500
-PULSOUT 13,500
-PAUSE 20
-NEXT
-FOR move_to = 1 TO 61
-PULSOUT 12,500
-PULSOUT 13,1000
-PAUSE 20
-NEXT
-FOR pick_up =1 TO 7
-PULSOUT 14,700
-PAUSE 20
-NEXT
-FOR turn_back = 1 TO 12
-PULSOUT 12,1000
-PULSOUT 13,1000
-PAUSE 20
-NEXT
-FOR move_to = 1 TO 61
-PULSOUT 12,500
-PULSOUT 13,1000
-PAUSE 20
-NEXT
-GOTO main
+  ' Get L color values
+  HIGH 5
+  PAUSE 3
+  RCTIME 5, 1, left_color_sensor
 
-dropoff:
-IF ABS(F_PHOTO)>20 GOTO drop
-IF ABS(F_PHOTO)<10 GOTO keep_looking
-GOTO dropoff
-drop:
-FOR Turn_to = 1 TO 12
-PULSOUT 12,500
-PULSOUT 13,500
-PAUSE 20
-NEXT
-FOR move_to = 1 TO 61
-PULSOUT 12,500
-PULSOUT 13,1000
-PAUSE 20
-NEXT
-FOR drop_off =1 TO 7
-PULSOUT 14,800
-PAUSE 20
-NEXT
-FOR turn_back = 1 TO 12
-PULSOUT 12,1000
-PULSOUT 13,1000
-PAUSE 20
-NEXT
-FOR move_to = 1 TO 61
-PULSOUT 12,500
-PULSOUT 13,1000
-PAUSE 20
-NEXT
-turn = 0
-GOTO main
+  ' Get F color value
+  HIGH 1
+  PAUSE 3
+  RCTIME 1, 1, front_color_sensor
 
-keep_looking:
-PULSOUT 12,500
-PULSOUT 13,500
-GOTO dropoff
+  ' Get F distance value
+  FREQOUT 7, 1, 38500
+  front_distance_value = IN8
+
+  ' If distance low then grab ball
+  IF IN8 = 0 THEN grab_ball
+  IF ABS(13 + left_color_sensor - right_color_sensor) > 10 THEN decide_direction
+
+decide_direction:
+  DEBUG "decide_direction"
+  IF 13 + left_color_sensor > right_color_sensor THEN turn_right
+  IF right_color_sensor < right_color_sensor THEN turn_left
+
+move_forward:
+  DEBUG "move_forward"
+  PULSOUT 12, 500
+  PULSOUT 13, 1000
+  PAUSE 20
+  GOTO main
+
+turn_left:
+  DEBUG "turn_left"
+  PULSOUT 12, 500
+  PULSOUT 13, 500
+  PAUSE 20
+  GOTO main
+
+turn_right:
+  DEBUG "turn_right"
+  PULSOUT 12, 1000
+  PULSOUT 13, 1000
+  PAUSE 20
+  GOTO main
+
+grab_ball:
+  DEBUG "grab_ball"
+  turn = turn + 1
+  IF turn = 1 THEN transport
+  IF turn = 2 THEN deposit
+
+transport:
+  DEBUG "transport"
+  FOR Turn_to = 1 TO 12
+    PULSOUT 12, 500
+    PULSOUT 13, 500
+    PAUSE 20
+  NEXT
+
+  FOR move_to = 1 TO 61
+    PULSOUT 12, 500
+    PULSOUT 13, 1000
+    PAUSE 20
+  NEXT
+
+  FOR pick_up = 1 TO 7
+    PULSOUT 14, 700
+    PAUSE 20
+  NEXT
+
+  FOR turn_back = 1 TO 12
+    PULSOUT 12, 1000
+    PULSOUT 13, 1000
+    PAUSE 20
+  NEXT
+
+  FOR move_to = 1 TO 61
+    PULSOUT 12, 500
+    PULSOUT 13, 1000
+    PAUSE 20
+  NEXT
+  GOTO main
+
+drop_ball:
+  DEBUG "drop_ball"
+  FOR Turn_to = 1 TO 12
+    PULSOUT 12, 500
+    PULSOUT 13, 500
+    PAUSE 20
+  NEXT
+
+  FOR move_to = 1 TO 61
+    PULSOUT 12, 500
+    PULSOUT 13, 1000
+    PAUSE 20
+  NEXT
+
+  FOR drop_off = 1 TO 7
+    PULSOUT 14, 800
+    PAUSE 20
+  NEXT
+
+  FOR turn_back = 1 TO 12
+    PULSOUT 12, 1000
+    PULSOUT 13, 1000
+    PAUSE 20
+  NEXT
+
+  FOR move_to = 1 TO 61
+    PULSOUT 12, 500
+    PULSOUT 13, 1000
+    PAUSE 20
+  NEXT
+
+  turn = 0
+  GOTO main
+
+find_target:
+  DEBUG "find_target"
+  PULSOUT 12, 500
+  PULSOUT 13, 500
+  GOTO deposit
+
+deposit:
+  DEBUG "deposit"
+  IF ABS(front_color_sensor) > 20 THEN drop_ball
+  IF ABS(front_color_sensor) < 10 THEN find_target
+  GOTO deposit

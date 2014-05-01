@@ -1,0 +1,140 @@
+' {$STAMP BS2}
+'-----------Declarations-----------"
+left_photo VAR Word
+right_photo VAR Word
+front_photo VAR Word
+left_ir det VAR Bit
+turn_back VAR Word
+pick_up VAR Word
+move_to VAR Word
+turn_to VAR Word
+turn VAR Word
+drop_off VAR Word
+keep_looking VAR Word
+drop VAR Word
+'----------intialization----------"
+LOW 12
+LOW 13
+LOW 14
+LOW 15
+OUTPUT 1
+OUTPUT 2
+OUTPUT 3
+OUTPUT 4
+OUTPUT 5
+OUTPUT 6
+OUTPUT 7
+OUTPUT 8
+OUTPUT 9
+OUTPUT 10
+OUTPUT 11
+OUTPUT 12
+FREQOUT 1, 2000 3000
+turn = 0
+'---------main program----------"
+main:
+HIGH 3 ' Set P3 to output-high.
+PAUSE 3 ' Pause f.or 3 ms.
+RCTIME 3,1,right_photo ' Measure RC time on P3.
+' Measure RC time for left photoresistor.
+HIGH 5 ' Set P5 to output-high.
+PAUSE 3 ' Pause for 3 ms.
+RCTIME 5,1,left_photo ' Measure RC time on P5.
+' Check if difference between RC times is within the deadband, 2 in this
+'case'
+' If yes, then forward. If no then skip to check_dir subroutine.
+RCTIME 1,1,front_photo 'measure RC time on front photo resistor
+FREQOUT 7, 1, 38500 ' Send freqout signal - left IRLED.
+left_IR_det = IN8 ' Store IR detector output in RAM.
+' Detect object on the right.
+IF IN8 =0 THEN pick_up_ball 'if object is in front pause the bot'
+IF ABS(13+left_photo-right_photo) > 10 THEN check_dir    'if their is something
+'in front than GOTO pick up routine'
+forward_pulse:   'move forward
+PULSOUT 12, 500
+PULSOUT 13, 1000
+PAUSE 20
+GOTO main
+check_dir:
+IF 13+left_photo > right_photo THEN right_pulse
+IF left_photo < right_photo THEN left_pulse
+'----- Navigation Routines -------
+left_pulse: ' Apply one pulse to left then
+PULSOUT 12, 500
+PULSOUT 13, 500
+PAUSE 20
+GOTO main ' go back to main routine.
+right_pulse: ' Apply one pulse to right then
+PULSOUT 12, 1000
+PULSOUT 13, 1000
+PAUSE 20
+GOTO main ' go back to main routine.
+'--------pick up object-------
+pick_up_ball:
+turn+1
+IF turn= 1 GOTO pickup
+IF turn= 2 GOTO dropoff
+
+pickup:
+FOR Turn_to = 1 TO 12
+PULSOUT 12,500
+PULSOUT 13,500
+PAUSE 20
+NEXT
+FOR move_to = 1 TO 61
+PULSOUT 12,500
+PULSOUT 13,1000
+PAUSE 20
+NEXT
+FOR pick_up =1 TO 7
+PULSOUT 14,700
+PAUSE 20
+NEXT
+FOR turn_back = 1 TO 12
+PULSOUT 12,1000
+PULSOUT 13,1000
+PAUSE 20
+NEXT
+FOR move_to = 1 TO 61
+PULSOUT 12,500
+PULSOUT 13,1000
+PAUSE 20
+NEXT
+GOTO main
+
+dropoff:
+IF ABS(front_photo)>20 GOTO drop
+IF ABS(front_photo)<10 GOTO keep_looking
+GOTO dropoff
+drop:
+FOR Turn_to = 1 TO 12
+PULSOUT 12,500
+PULSOUT 13,500
+PAUSE 20
+NEXT
+FOR move_to = 1 TO 61
+PULSOUT 12,500
+PULSOUT 13,1000
+PAUSE 20
+NEXT
+FOR drop_off =1 TO 7
+PULSOUT 14,800
+PAUSE 20
+NEXT
+FOR turn_back = 1 TO 12
+PULSOUT 12,1000
+PULSOUT 13,1000
+PAUSE 20
+NEXT
+FOR move_to = 1 TO 61
+PULSOUT 12,500
+PULSOUT 13,1000
+PAUSE 20
+NEXT
+turn = 0
+GOTO main
+
+keep_looking:
+PULSOUT 12,500
+PULSOUT 13,500
+GOTO dropoff

@@ -1,0 +1,176 @@
+'
+' Final Code - v5.0
+'
+' Drives the robot to the end of the field by following a black line, picks a
+' ping-pong ball up from a pedestal, drives it back to the start of the field,
+' identifies its color and drops it in a container of the corresponding color.
+'
+' Phew.
+'
+' By Jamison Bryant <robojamison@gmail.com>
+'
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+'
+
+'--------------- Constants ----------------
+
+'' Servo motors
+r_servo_motor_port CON 12
+l_servo_motor_port CON 13
+s_servo_motor_port CON 14
+
+'' Photo sensors
+r_photo_sensor_port CON 3
+l_photo_sensor_port CON 5
+'b_photo_sensor_port CON -1
+
+'' Infrared sensors
+'r_infra_sensor_port CON -1
+l_infra_sensor_port CON 7
+
+'--------------- Variables ----------------
+
+'' Photo sensor values
+r_photo_sensor_value VAR Word
+l_photo_sensor_value VAR Word
+
+'' Infrared sensor values
+'r_infra_sensor_value VAR Bit
+l_infra_sensor_value VAR Bit
+
+'' Miscellaneous variables
+start_count VAR Word
+pulse_count VAR Word
+scan_count VAR Word
+
+'-------------- Initialization ------------
+
+'' Servo motor initialization
+LOW r_servo_motor_port
+LOW l_servo_motor_port
+
+'' Infrared sensors initialization
+'OUTPUT r_infra_sensor_port
+OUTPUT l_infra_sensor_port
+
+' Start/reset program
+FREQOUT 4, 2000, 3000
+
+FOR start_count = 5 TO 1
+  DEBUG HOME, "Starting in ", DEC start_count, "..."
+  PAUSE 1000
+NEXT
+
+'---------------- Subroutines -------------
+
+main:
+  ' Scan for the ball
+  GOSUB scan_ball
+
+  ' Scoop up the ball
+  GOSUB take_break
+  GOSUB scoop_ball
+
+scan_ball:
+  DO
+    DEBUG HOME, "Scanning for ball...", CLREOL
+
+    ' Update infrared sensor value
+    FREQOUT l_infra_sensor_port, 1, 65530
+    l_infra_sensor_value = IN8
+
+    IF l_infra_sensor_value = 0 THEN
+      ' Triggered - verify scan
+      FOR scan_count = 1 TO 100
+        DEBUG HOME, "Verifying scan...", DEC scan_count, "%", CLREOL
+
+        ' Update infrared sensor value
+        FREQOUT l_infra_sensor_port, 1, 65530
+        l_infra_sensor_value = IN8
+
+        IF l_infra_sensor_value = 1 THEN
+          GOSUB go_forward
+          PAUSE 500
+          GOTO scan_ball
+        ENDIF
+      NEXT
+
+      RETURN
+    ELSE
+      ' Not triggered - move towards the ball
+      GOSUB go_forward
+      PAUSE 20
+    ENDIF
+  LOOP
+
+  RETURN
+
+scoop_ball:
+  DEBUG CR, "Approaching ball..."
+
+  ' Approach ball
+  FOR pulse_count = 1 TO 50
+    GOSUB go_forward
+    PAUSE 20
+  NEXT
+
+  GOSUB take_break
+  DEBUG CR, "Scooping ball..."
+
+  ' Scoop up ball
+  FOR pulse_count = 1 TO 35
+    PULSOUT s_servo_motor_port, 850
+    PAUSE 20
+  NEXT
+
+  GOSUB take_break
+  DEBUG CR, "Backing away..."
+
+  ' Back away with ball
+  FOR pulse_count = 1 TO 50
+    GOSUB go_backward
+    PAUSE 20
+  NEXT
+
+  GOSUB take_break
+  DEBUG CR, "Releasing ball..."
+
+  ' Release ball
+  FOR pulse_count = 1 TO 35
+    PULSOUT s_servo_motor_port, 650
+    PAUSE 20
+  NEXT
+
+  ' End program
+  END
+
+go_forward:
+  PULSOUT r_servo_motor_port, 650
+  PULSOUT l_servo_motor_port, 850
+  RETURN
+
+go_backward:
+  PULSOUT r_servo_motor_port, 850
+  PULSOUT l_servo_motor_port, 650
+  RETURN
+
+turn_right:
+  PULSOUT r_servo_motor_port, 850
+  PULSOUT l_servo_motor_port, 850
+  RETURN
+
+turn_left:
+  PULSOUT r_servo_motor_port, 650
+  PULSOUT l_servo_motor_port, 650
+  RETURN
+
+full_stop:
+  PULSOUT r_servo_motor_port, 750
+  PULSOUT l_servo_motor_port, 750
+  RETURN
+
+take_break:
+  DEBUG CR, "Taking a break..."
+  PAUSE 1000
+  RETURN

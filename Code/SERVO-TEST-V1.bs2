@@ -1,0 +1,46 @@
+'
+' Servo Motor Test - v1.0
+'
+' Tests that servo motors are working by turning them both on at once for
+' a short time, then turning them on one at a time for a short time.
+'
+' By Jamison Bryant <robojamison@gmail.com>
+'
+
+' {$STAMP BS2}
+
+'-------------- Declarations --------------
+r_servo_port CON 12
+l_servo_port CON 13
+pulse_count VAR Word
+
+'-------------- Initialization ------------
+LOW r_servo_port
+LOW l_servo_port
+
+'-------------- Subroutines ---------------
+main:
+  ' Go straight
+  FOR pulse_count = 1 TO 100
+    PULSOUT r_servo_port, 500
+    PULSOUT l_servo_port, 1000
+    PAUSE 20
+  NEXT
+
+  PAUSE 1000
+
+  ' Turn left
+  FOR pulse_count = 1 TO 100
+    PULSOUT r_servo_port, 500
+    PULSOUT l_servo_port, 500
+    PAUSE 20
+  NEXT
+
+  PAUSE 1000
+
+  ' Turn right
+  FOR pulse_count = 1 TO 100
+    PULSOUT r_servo_port, 1000
+    PULSOUT l_servo_port, 1000
+    PAUSE 20
+  NEXT

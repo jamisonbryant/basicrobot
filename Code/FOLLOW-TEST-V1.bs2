@@ -1,0 +1,77 @@
+'
+' Line Follow Test - v1.0
+'
+' Tests that the line following code works by using the photoresistors to
+' follow a black line on a white background.
+'
+' By Jamison Bryant <robojamison@gmail.com>
+'
+
+' {$STAMP BS2}
+
+'-------------- Declarations --------------
+'' Constants
+r_servo_port CON 12
+l_servo_port CON 13
+r_photo_port CON 3
+l_photo_port CON 5
+
+'' Variables
+r_photo_time VAR Word
+l_photo_time VAR Word
+rc_time_diff VAR Word
+rc_diff_band VAR Word
+
+'-------------- Initialization ------------
+OUTPUT 2
+FREQOUT 2, 2000, 3000
+LOW r_servo_port
+LOW l_servo_port
+rc_diff_band = 50
+
+'-------------- Subroutines ---------------
+main:
+  ' Measure RC time on right photoresistor
+  HIGH r_photo_port
+  PAUSE 3
+  RCTIME r_photo_port, 1, r_photo_time
+
+  ' Measure RC time on left photoresistor
+  HIGH l_photo_port
+  PAUSE 3
+  RCTIME l_photo_port, 1, l_photo_time
+
+  ' Calculate difference in RC times
+  rc_time_diff = ABS(r_photo_time - l_photo_time)
+
+  ' Check if time difference is in range
+  IF rc_time_diff > rc_diff_band THEN adjust_pos
+
+  ' Move forward and begin subroutine again
+  DEBUG HOME, "R: ", DEC5 r_photo_time, ", L: ", DEC5 l_photo_time, ", D: ", DEC5 rc_time_diff, " -> S"
+  PULSOUT r_servo_port, 500
+  PULSOUT l_servo_port, 1000
+  PAUSE 10
+  GOTO main
+
+adjust_pos:
+  IF l_photo_time > r_photo_time THEN adjust_left
+  IF l_photo_time < r_photo_time THEN adjust_right
+
+adjust_right:
+  DEBUG HOME, "R: ", DEC5 r_photo_time, ", L: ", DEC5 l_photo_time, ", D: ", DEC5 rc_time_diff, " -> R"
+
+  PULSOUT l_servo_port, 1000
+  PULSOUT r_servo_port, 1000
+  PAUSE 10
+  GOTO main
+
+adjust_left:
+    DEBUG HOME, "R: ", DEC5 r_photo_time, ", L: ", DEC5 l_photo_time, ", D: ", DEC5 rc_time_diff, " -> L"
+
+  PULSOUT l_servo_port, 500
+  PULSOUT r_servo_port, 500
+  PAUSE 10
+  GOTO main
+
+

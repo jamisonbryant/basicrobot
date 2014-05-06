@@ -1,0 +1,38 @@
+'
+' Infrared Test - v1.0
+'
+' Tests that the infrared sensors are working correctly by getting their values
+' and writing them to the debug console.
+'
+' By Jamison Bryant <robojamison@gmail.com>
+'
+
+' {$STAMP BS2}
+
+'-------------- Declarations --------------
+r_infra_port CON 1
+l_infra_port CON 7
+
+r_infra_val VAR Bit
+l_infra_val VAR Bit
+
+'-------------- Initialization ------------
+OUTPUT r_infra_port
+OUTPUT l_infra_port
+
+'-------------- Subroutines ---------------
+main:
+  ' Get value of left infrared sensor
+  FREQOUT l_infra_port, 1, 65530
+  l_infra_val = IN8
+
+  ' Get value of right infrared sensor
+  FREQOUT r_infra_port, 1, 65530
+  r_infra_val = IN0
+
+  ' Print debug information
+  DEBUG HOME, "R: ", BIN1 r_infra_val, ", L: ", BIN1 l_infra_val
+  PAUSE 20
+
+  ' Repeat subroutine
+  GOTO main

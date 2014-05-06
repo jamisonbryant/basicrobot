@@ -1,0 +1,35 @@
+'
+' Photoresistor Test - v1.0
+'
+' Tests that the photoresistors are working correctly by getting their
+' RC times and outputting them to the debug console.
+'
+' By Jamison Bryant <robojamison@gmail.com>
+'
+
+' {$STAMP BS2}
+
+'-------------- Declarations --------------
+r_photo_port CON 3
+l_photo_port CON 5
+r_photo_time VAR Word
+l_photo_time VAR Word
+
+'-------------- Initialization ------------
+DEBUG CLS
+
+'-------------- Subroutines ---------------
+main:
+  ' Get RC time of right photoresistor
+  HIGH r_photo_port
+  PAUSE 3
+  RCTIME r_photo_port, 1, r_photo_time
+
+  ' Get RC time of left photoresistor
+  HIGH l_photo_port
+  PAUSE 3
+  RCTIME l_photo_port, 1, l_photo_time
+
+  ' Output RC times to debug console
+  DEBUG HOME, "R: ", DEC5 r_photo_time, ", L: ", DEC5 l_photo_time
+  GOTO main

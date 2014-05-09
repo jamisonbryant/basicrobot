@@ -42,7 +42,7 @@ main:
   RCTIME l_photo_port, 1, l_photo_time
 
   ' Calculate difference in RC times
-  rc_time_diff = ABS(3+r_photo_time - 100+l_photo_time)
+  rc_time_diff = ABS(r_photo_time - l_photo_time)
 
   ' Check if time difference is in range
   IF rc_time_diff > rc_diff_band THEN adjust_pos
@@ -55,7 +55,7 @@ main:
   GOTO main
 
 adjust_pos:
-  IF 100+l_photo_time > r_photo_time THEN adjust_left
+  IF l_photo_time > r_photo_time THEN adjust_left
   IF l_photo_time < r_photo_time THEN adjust_right
 
 adjust_right:

@@ -65,12 +65,9 @@ NEXT
 '---------------- Subroutines -------------
 
 main:
-  ' Scan for the ball
-  GOSUB scan_ball
-
   ' Scoop up the ball
-  GOSUB take_break
   GOSUB scoop_ball
+
 
 scan_ball:
   DO
@@ -110,7 +107,7 @@ scoop_ball:
   DEBUG CR, "Approaching ball..."
 
   ' Approach ball
-  FOR pulse_count = 1 TO 50
+  FOR pulse_count = 1 TO 70
     GOSUB go_forward
     PAUSE 20
   NEXT
@@ -128,8 +125,26 @@ scoop_ball:
   DEBUG CR, "Backing away..."
 
   ' Back away with ball
-  FOR pulse_count = 1 TO 60
+  FOR pulse_count = 1 TO 50
     GOSUB go_backward
+    PAUSE 20
+  NEXT
+
+  GOSUB take_break
+  DEBUG CR, "Turning around..."
+
+  ' Turn around
+  FOR pulse_count = 1 TO 40
+    GOSUB turn_right
+    PAUSE 20
+  NEXT
+
+  GOSUB take_break
+  DEBUG CR, "Going away..."
+
+  ' Back away with ball
+  FOR pulse_count = 1 TO 50
+    GOSUB go_forward
     PAUSE 20
   NEXT
 
